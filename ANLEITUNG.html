@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PWA Installationsanleitung – Arbeitszeiterfassung</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #f1f5f9;
+    color: #1e293b;
+    padding: 2rem 1rem 4rem;
+  }
+  .container { max-width: 720px; margin: 0 auto; }
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.4rem;
+  }
+  .subtitle { color: #64748b; font-size: 0.9rem; margin-bottom: 2rem; }
+  .section {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .badge {
+    background: #10b981;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+  }
+  .badge.blue { background: #3b82f6; }
+  ol, ul { padding-left: 1.4rem; }
+  li { margin-bottom: 0.6rem; line-height: 1.6; font-size: 0.9rem; color: #334155; }
+  code {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 3px;
+    padding: 0.1rem 0.4rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.82rem;
+    color: #0f172a;
+  }
+  .cmd {
+    background: #0f172a;
+    color: #10b981;
+    font-family: 'Courier New', monospace;
+    font-size: 0.83rem;
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    margin: 0.75rem 0;
+    line-height: 1.8;
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .tip {
+    background: #ecfdf5;
+    border-left: 3px solid #10b981;
+    padding: 0.75rem 1rem;
+    border-radius: 0 4px 4px 0;
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    color: #065f46;
+  }
+  .warn {
+    background: #fff7ed;
+    border-left: 3px solid #f97316;
+    padding: 0.75rem 1rem;
+    border-radius: 0 4px 4px 0;
+    font-size: 0.85rem;
+    color: #9a3412;
+    margin-top: 0.75rem;
+  }
+  .files {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.82rem;
+    line-height: 1.9;
+    color: #334155;
+    margin: 0.75rem 0;
+  }
+  .files .folder { color: #3b82f6; font-weight: bold; }
+  .files .file { color: #0f172a; }
+  .files .comment { color: #94a3b8; font-style: italic; }
+  a { color: #2563eb; }
+  .divider {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.8rem;
+    margin: 0.5rem 0 1rem;
+    letter-spacing: 0.05em;
+  }
+  @media (max-width: 500px) {
+    .cmd { font-size: 0.75rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>📱 Arbeitszeiterfassung als App installieren</h1>
+  <p class="subtitle">Zwei Wege – lokal oder im Web – beide kostenlos und ohne Konto</p>
+
+  <!-- FILE STRUCTURE -->
+  <div class="section">
+    <div class="section-title">📁 Dateien im ZIP</div>
+    <div class="files">
+<span class="folder">arbeitszeit-pwa/</span>
+  <span class="file">index.html</span>      <span class="comment">← die App selbst</span>
+  <span class="file">manifest.json</span>   <span class="comment">← App-Name, Icon, Farben</span>
+  <span class="file">sw.js</span>           <span class="comment">← Offline-Unterstützung</span>
+  <span class="folder">icons/</span>
+    <span class="file">icon-192.png</span>  <span class="comment">← App-Icon</span>
+    <span class="file">icon-512.png</span>  <span class="comment">← App-Icon (groß)</span>
+    </div>
+    <div class="warn">⚠ Alle Dateien müssen im selben Ordner bleiben. Nicht einzeln verschieben.</div>
+  </div>
+
+  <!-- WEG 1: LOKAL -->
+  <div class="section">
+    <div class="section-title">
+      🖥 Weg 1: Lokal auf PC / Mac
+      <span class="badge">Einfachster Weg</span>
+    </div>
+    <p style="font-size:0.88rem;color:#475569;margin-bottom:1rem;">
+      Funktioniert ohne Internet-Verbindung. Du brauchst nur einen einfachen lokalen Webserver –
+      dein Browser öffnet <code>file://</code>-Dateien ohne Service Worker.
+    </p>
+
+    <p style="font-weight:600;font-size:0.88rem;margin-bottom:0.5rem;">Option A – Python (meist vorinstalliert):</p>
+    <ol>
+      <li>ZIP entpacken → in den Ordner <code>arbeitszeit-pwa</code> navigieren</li>
+      <li>Terminal / Eingabeaufforderung im Ordner öffnen</li>
+      <li>Diesen Befehl eingeben:</li>
+    </ol>
+    <div class="cmd">python3 -m http.server 8080</div>
+    <ol start="4">
+      <li>Browser öffnen → <code>http://localhost:8080</code></li>
+      <li>Chrome/Edge: in der Adressleiste erscheint ein <strong>Installieren-Symbol ⊕</strong> → klicken → fertig!</li>
+    </ol>
+    <div class="tip">✓ Die App erscheint dann im Startmenü / Dock wie eine normale App.</div>
+
+    <div class="divider">── oder ──</div>
+
+    <p style="font-weight:600;font-size:0.88rem;margin-bottom:0.5rem;">Option B – Node.js:</p>
+    <div class="cmd">npx serve .</div>
+
+    <div class="divider">── oder ──</div>
+
+    <p style="font-weight:600;font-size:0.88rem;margin-bottom:0.5rem;">Option C – VS Code Extension:</p>
+    <ol>
+      <li>Extension <strong>"Live Server"</strong> installieren</li>
+      <li><code>index.html</code> öffnen → unten rechts auf <strong>Go Live</strong> klicken</li>
+      <li>Browser öffnet automatisch → installieren wie oben</li>
+    </ol>
+  </div>
+
+  <!-- WEG 2: GITHUB PAGES -->
+  <div class="section">
+    <div class="section-title">
+      ☁ Weg 2: GitHub Pages (kostenlos, weltweit erreichbar)
+      <span class="badge blue">Empfohlen</span>
+    </div>
+    <p style="font-size:0.88rem;color:#475569;margin-bottom:1rem;">
+      Kostenloser Webspace von GitHub. Einmal hochladen – dann überall per Link + App installierbar.
+      Du brauchst ein kostenloses GitHub-Konto.
+    </p>
+    <ol>
+      <li>Kostenloses Konto erstellen: <a href="https://github.com" target="_blank">github.com</a></li>
+      <li>Neues Repository erstellen (grüner Button) → Name z.B. <code>arbeitszeit</code></li>
+      <li>Alle 5 Dateien hochladen (Upload files → Dateien reinziehen)</li>
+      <li>Im Repository: <strong>Settings → Pages → Branch: main → Save</strong></li>
+      <li>Nach ~1 Minute erreichbar unter:<br>
+          <code>https://DEIN-NAME.github.io/arbeitszeit/</code></li>
+      <li>Diese URL im Smartphone-Browser öffnen → <strong>„Zum Startbildschirm hinzufügen"</strong></li>
+    </ol>
+    <div class="tip">
+      ✓ Auf iPhone: Safari → Teilen-Symbol → „Zum Home-Bildschirm" <br>
+      ✓ Auf Android: Chrome → Menü (⋮) → „App installieren"
+    </div>
+    <div class="warn">
+      ⚠ Deine Daten bleiben lokal im Browser gespeichert (LocalStorage).
+      Sie werden nie auf GitHub hochgeladen.
+    </div>
+  </div>
+
+  <!-- WEG 2b: NETLIFY -->
+  <div class="section">
+    <div class="section-title">⚡ Weg 2b: Netlify Drop (noch einfacher)</div>
+    <ol>
+      <li>Gehe zu <a href="https://app.netlify.com/drop" target="_blank">app.netlify.com/drop</a></li>
+      <li>Den kompletten Ordner <code>arbeitszeit-pwa</code> per Drag & Drop reinziehen</li>
+      <li>Fertig – du bekommst sofort eine URL wie <code>https://zufälliger-name.netlify.app</code></li>
+      <li>Diese URL auf dem Smartphone öffnen und als App installieren</li>
+    </ol>
+    <div class="tip">✓ Kein Konto nötig für den ersten Upload. Kostenlos.</div>
+  </div>
+
+</div>
+</body>
+</html>
