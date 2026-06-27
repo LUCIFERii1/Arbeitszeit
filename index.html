@@ -305,25 +305,46 @@ function drucken(){
   var days=entries.length, avg=Math.round(total/days);
   var rows="";
   entries.forEach(function(e){
-    rows+="<tr style=\"border-bottom:1px solid #f1f5f9;\">";
-    rows+="<td style=\"padding:0.6rem;\">"+fmtDate(e.date)+"</td>";
-    rows+="<td style=\"padding:0.6rem;\">"+(e.start||"--")+"</td>";
-    rows+="<td style=\"padding:0.6rem;\">"+(e.end||"--")+"</td>";
-    rows+="<td style=\"padding:0.6rem;\">"+(e.brk||0)+" min</td>";
-    rows+="<td style=\"padding:0.6rem;color:#059669;font-weight:700;\">"+fmt(e.net)+" h</td>";
+    rows+="<tr>";
+    rows+="<td style=\"padding:0.6rem 0.75rem;border-bottom:1px solid #e2e8f0;\">"+fmtDate(e.date)+"</td>";
+    rows+="<td style=\"padding:0.6rem 0.75rem;border-bottom:1px solid #e2e8f0;\">"+(e.start||"--")+"</td>";
+    rows+="<td style=\"padding:0.6rem 0.75rem;border-bottom:1px solid #e2e8f0;\">"+(e.end||"--")+"</td>";
+    rows+="<td style=\"padding:0.6rem 0.75rem;border-bottom:1px solid #e2e8f0;\">"+(e.brk||0)+" min</td>";
+    rows+="<td style=\"padding:0.6rem 0.75rem;border-bottom:1px solid #e2e8f0;color:#059669;font-weight:700;\">"+fmt(e.net)+" h</td>";
     rows+="</tr>";
   });
-  document.getElementById("modal-month-label").textContent=label;
-  document.getElementById("modal-content").innerHTML=
-    "<div style=\"display:flex;gap:0;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:1.5rem;overflow:hidden;\">"+
-    "<div style=\"flex:1;text-align:center;padding:1rem;border-right:1px solid #e2e8f0;\"><div style=\"font-size:1.5rem;font-weight:800;color:#10b981;\">"+fmt(total)+" h</div><div style=\"font-size:0.65rem;color:#94a3b8;text-transform:uppercase;font-weight:700;margin-top:0.2rem;\">Gesamt</div></div>"+
-    "<div style=\"flex:1;text-align:center;padding:1rem;border-right:1px solid #e2e8f0;\"><div style=\"font-size:1.5rem;font-weight:800;\">"+days+"</div><div style=\"font-size:0.65rem;color:#94a3b8;text-transform:uppercase;font-weight:700;margin-top:0.2rem;\">Arbeitstage</div></div>"+
-    "<div style=\"flex:1;text-align:center;padding:1rem;\"><div style=\"font-size:1.5rem;font-weight:800;\">"+fmt(avg)+" h</div><div style=\"font-size:0.65rem;color:#94a3b8;text-transform:uppercase;font-weight:700;margin-top:0.2rem;\">Ø pro Tag</div></div>"+
-    "</div>"+
-    "<table style=\"width:100%;border-collapse:collapse;font-size:0.9rem;\">"+
-    "<thead><tr style=\"background:#0f172a;color:#fff;\"><th style=\"padding:0.7rem;text-align:left;\">Datum</th><th style=\"padding:0.7rem;text-align:left;\">Beginn</th><th style=\"padding:0.7rem;text-align:left;\">Ende</th><th style=\"padding:0.7rem;text-align:left;\">Pause</th><th style=\"padding:0.7rem;text-align:left;\">Nettozeit</th></tr></thead>"+
-    "<tbody>"+rows+"</tbody></table>";
-  document.getElementById("pdf-modal").classList.add("show");
+  var w=window.open("","_blank","width=800,height=900");
+  w.document.write("<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Arbeitszeit "+label+"</title><style>");
+  w.document.write("*{box-sizing:border-box;margin:0;padding:0;}");
+  w.document.write("body{font-family:Arial,sans-serif;padding:2rem;color:#1e293b;background:#fff;}");
+  w.document.write(".top{background:#0f172a;padding:1.25rem 1.5rem;border-radius:8px;margin-bottom:1.5rem;}");
+  w.document.write(".top h1{color:#fff;font-size:1.3rem;font-weight:800;margin-bottom:0.25rem;}");
+  w.document.write(".top p{color:#10b981;font-size:0.85rem;}");
+  w.document.write(".stats{display:flex;border:2px solid #e2e8f0;border-radius:8px;margin-bottom:1.5rem;overflow:hidden;}");
+  w.document.write(".stat{flex:1;text-align:center;padding:1rem;border-right:2px solid #e2e8f0;}");
+  w.document.write(".stat:last-child{border-right:none;}");
+  w.document.write(".stat-val{font-size:1.6rem;font-weight:800;color:#10b981;}");
+  w.document.write(".stat-val.dark{color:#0f172a;}");
+  w.document.write(".stat-lbl{font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#94a3b8;margin-top:0.2rem;}");
+  w.document.write("table{width:100%;border-collapse:collapse;font-size:0.9rem;}");
+  w.document.write("thead tr{background:#0f172a;}");
+  w.document.write("thead th{padding:0.75rem;text-align:left;color:#fff;font-weight:700;font-size:0.8rem;text-transform:uppercase;}");
+  w.document.write("tbody tr:nth-child(even){background:#f8fafc;}");
+  w.document.write(".footer{margin-top:1.5rem;text-align:center;font-size:0.75rem;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:0.75rem;}");
+  w.document.write("@media print{@page{margin:1.5cm;}thead tr{-webkit-print-color-adjust:exact;print-color-adjust:exact;}.top{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}");
+  w.document.write("</style></head><body>");
+  w.document.write("<div class='top'><h1>Arbeitszeiterfassung</h1><p>Monatsbericht - "+label+" - Erstellt: "+new Date().toLocaleDateString("de-DE")+"</p></div>");
+  w.document.write("<div class='stats'>");
+  w.document.write("<div class='stat'><div class='stat-val'>"+fmt(total)+" h</div><div class='stat-lbl'>Gesamt</div></div>");
+  w.document.write("<div class='stat'><div class='stat-val dark'>"+days+"</div><div class='stat-lbl'>Arbeitstage</div></div>");
+  w.document.write("<div class='stat'><div class='stat-val dark'>"+fmt(avg)+" h</div><div class='stat-lbl'>Ø pro Tag</div></div>");
+  w.document.write("</div>");
+  w.document.write("<table><thead><tr><th>Datum</th><th>Beginn</th><th>Ende</th><th>Pause</th><th>Nettozeit</th></tr></thead><tbody>"+rows+"</tbody></table>");
+  w.document.write("<div class='footer'>Arbeitszeiterfassung - "+label+"</div>");
+  w.document.write("</body></html>");
+  w.document.close();
+  w.focus();
+  setTimeout(function(){ w.print(); }, 500);
 }
 
 function closeModal(){
