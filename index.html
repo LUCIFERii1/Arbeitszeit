@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arbeitszeiterfassung</title>
+<meta name="theme-color" content="#0f172a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Arbeitszeit">
+<link rel="apple-touch-icon" id="apple-icon">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#f0f4f8;font-family:Arial,sans-serif;color:#1e293b;min-height:100vh;padding-bottom:env(safe-area-inset-bottom);}
+.header{background:#0f172a;border-bottom:3px solid #10b981;padding:0 1.25rem;padding-top:env(safe-area-inset-top);height:calc(62px + env(safe-area-inset-top));display:flex;align-items:flex-end;padding-bottom:0.8rem;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.header-title{font-size:1rem;font-weight:700;color:#f8fafc;letter-spacing:0.06em;text-transform:uppercase;}
+.sw-badge{font-size:0.68rem;color:#10b981;font-weight:600;}
+.install-btn{background:#10b981;color:#fff;border:none;border-radius:20px;padding:0.3rem 0.8rem;font-size:0.68rem;font-weight:700;cursor:pointer;display:none;}
+main{max-width:560px;margin:0 auto;padding:1rem 0.875rem 4rem;}
+.card{background:#fff;border-radius:12px;padding:1.25rem;margin-bottom:0.875rem;box-shadow:0 1px 4px rgba(0,0,0,0.08);}
+.card-title{font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#94a3b8;margin-bottom:1rem;padding-bottom:0.6rem;border-bottom:2px solid #f1f5f9;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.875rem;}
+.full{grid-column:1/-1;}
+.field label{display:block;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#64748b;margin-bottom:0.35rem;}
+.field input{display:block;width:100%;padding:0.7rem 0.9rem;border:2px solid #e2e8f0;border-radius:8px;font-size:1rem;color:#1e293b;background:#f8fafc;outline:none;-webkit-appearance:none;appearance:none;}
+.field input:focus{border-color:#10b981;background:#fff;}
+.preview{background:#f8fafc;border:2px solid #e2e8f0;border-radius:8px;padding:0.65rem 1rem;text-align:center;font-size:0.9rem;font-weight:600;color:#94a3b8;margin-bottom:0.875rem;min-height:44px;display:flex;align-items:center;justify-content:center;}
+.preview.ok{background:#f0fdf4;border-color:#bbf7d0;color:#15803d;}
+.btn-save{width:100%;padding:0.85rem;background:#10b981;color:#fff;border:none;border-radius:10px;font-size:0.95rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;cursor:pointer;}
+.btn-save:active{background:#059669;}
+.month-sel{width:100%;padding:0.65rem 0.9rem;border:2px solid #e2e8f0;border-radius:8px;font-size:0.95rem;color:#1e293b;background:#f8fafc;outline:none;-webkit-appearance:none;appearance:none;margin-bottom:0.875rem;}
+.export-row{display:flex;gap:0.5rem;margin-bottom:1rem;}
+.btn-csv{flex:1;padding:0.6rem;background:#fff;color:#475569;border:2px solid #e2e8f0;border-radius:8px;font-size:0.78rem;font-weight:700;text-transform:uppercase;cursor:pointer;}
+.btn-print{flex:1;padding:0.6rem;background:#1e293b;color:#fff;border:none;border-radius:8px;font-size:0.78rem;font-weight:700;text-transform:uppercase;cursor:pointer;}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin-bottom:1rem;}
+.stat{background:#f8fafc;border:2px solid #f1f5f9;border-radius:10px;padding:0.75rem 0.25rem;text-align:center;}
+.stat-val{font-size:1.25rem;font-weight:800;color:#0f172a;line-height:1.1;margin-bottom:0.2rem;}
+.stat-val.green{color:#10b981;}
+.stat-lbl{font-size:0.58rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#94a3b8;}
+.entry-card{background:#f8fafc;border:2px solid #f1f5f9;border-radius:10px;padding:0.875rem 1rem;margin-bottom:0.5rem;position:relative;}
+.entry-date{font-size:0.75rem;font-weight:700;color:#64748b;margin-bottom:0.5rem;}
+.entry-fields{display:grid;grid-template-columns:repeat(4,1fr);gap:0.25rem;}
+.ef-item{display:flex;flex-direction:column;gap:0.15rem;}
+.ef-lbl{font-size:0.56rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#94a3b8;}
+.ef-val{font-size:0.9rem;font-weight:600;color:#1e293b;}
+.ef-val.green{color:#059669;font-size:0.95rem;font-weight:800;}
+.del-btn{position:absolute;top:0.6rem;right:0.6rem;background:#fee2e2;border:none;color:#ef4444;font-size:0.75rem;font-weight:700;cursor:pointer;padding:0.25rem 0.5rem;border-radius:6px;}
+.empty{text-align:center;padding:2.5rem 1rem;color:#94a3b8;font-size:0.85rem;}
+#toast{position:fixed;bottom:calc(1.25rem + env(safe-area-inset-bottom));left:1rem;right:1rem;background:#0f172a;color:#10b981;font-size:0.82rem;font-weight:600;padding:0.875rem 1.25rem;border-radius:10px;border-left:4px solid #10b981;opacity:0;transform:translateY(8px);transition:opacity 0.2s,transform 0.2s;pointer-events:none;z-index:999;text-align:center;}
+#toast.show{opacity:1;transform:translateY(0);}
+@media print{.header,.no-print{display:none!important;}.print-area{display:block!important;}.entries-section{display:none!important;}body{background:#fff;}}
+.print-area{display:none;}
+</style>
+</head>
+<body>
+<header class="header">
+<div class="header-title">Arbeitszeiterfassung</div>
+<div style="display:flex;align-items:center;gap:0.6rem;">
+<button class="install-btn" id="install-btn" onclick="installPWA()">+ App</button>
+<span class="sw-badge" id="sw-status">PWA</span>
+</div>
+</header>
+<main>
+<div class="card no-print">
+<div class="card-title">Neuer Eintrag</div>
+<div class="form-grid">
+<div class="field full"><label for="inp-date">Datum</label><input type="date" id="inp-date"></div>
+<div class="field"><label for="inp-start">Beginn</label><input type="time" id="inp-start"></div>
+<div class="field"><label for="inp-end">Ende</label><input type="time" id="inp-end"></div>
+<div class="field full"><label for="inp-break">Pause (Minuten)</label><input type="number" id="inp-break" min="0" max="480" step="5" placeholder="0"></div>
+</div>
+<div class="preview" id="preview">Nettozeit wird berechnet...</div>
+<button class="btn-save" onclick="saveEntry()">Eintrag speichern</button>
+</div>
+<div class="card">
+<div class="card-title">Monatsübersicht</div>
+<select class="month-sel" id="month-select" onchange="renderEntries()"></select>
+<div class="export-row no-print">
+<button class="btn-csv" onclick="exportCSV()">CSV Export</button>
+<button class="btn-print" onclick="drucken()">Drucken / PDF</button>
+</div>
+<div class="stats">
+<div class="stat"><div class="stat-val green" id="stat-total">0:00</div><div class="stat-lbl">Gesamt</div></div>
+<div class="stat"><div class="stat-val" id="stat-days">0</div><div class="stat-lbl">Tage</div></div>
+<div class="stat"><div class="stat-val" id="stat-avg">0:00</div><div class="stat-lbl">Ø / Tag</div></div>
+</div>
+<div id="entries-list" class="entries-section"><div class="empty">Noch keine Eintraege vorhanden.</div></div>
+</div>
+</main>
+<div class="print-area" id="print-area"></div>
+<div id="toast"></div>
+<script>
+var I192 = "data:image/png;base64,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";
+var I512 = "data:image/png;base64,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";
+document.getElementById("apple-icon").href = I192;
+
+(function(){
+  var m = {name:"Arbeitszeiterfassung",short_name:"Arbeitszeit",start_url:"./",display:"standalone",background_color:"#0f172a",theme_color:"#0f172a",lang:"de",icons:[{src:I192,sizes:"192x192",type:"image/png",purpose:"any maskable"},{src:I512,sizes:"512x512",type:"image/png",purpose:"any maskable"}]};
+  var l = document.createElement("link");
+  l.rel = "manifest";
+  l.href = URL.createObjectURL(new Blob([JSON.stringify(m)], {type:"application/manifest+json"}));
+  document.head.appendChild(l);
+})();
+
+if ("serviceWorker" in navigator) {
+  var sw = "const V=\'az-v8\';self.addEventListener(\'install\',function(e){e.waitUntil(caches.open(V).then(function(c){return c.addAll([self.location.href]);}).then(function(){return self.skipWaiting();}));});self.addEventListener(\'activate\',function(e){e.waitUntil(caches.keys().then(function(k){return Promise.all(k.filter(function(x){return x!==V;}).map(function(x){return caches.delete(x);}));}).then(function(){return self.clients.claim();}));});self.addEventListener(\'fetch\',function(e){e.respondWith(caches.match(e.request).then(function(r){return r||fetch(e.request);}));});";
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw], {type:"application/javascript"})), {scope:"./"})
+    .then(function(){ document.getElementById("sw-status").textContent = "Offline OK"; })
+    .catch(function(){});
+}
+
+var dp = null;
+window.addEventListener("beforeinstallprompt", function(e){ e.preventDefault(); dp = e; document.getElementById("install-btn").style.display = "block"; });
+function installPWA(){ if(!dp)return; dp.prompt(); dp.userChoice.then(function(){ dp=null; document.getElementById("install-btn").style.display="none"; }); }
+
+var KEY = "arbeitszeit_v1";
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY))||[]; }catch(e){ return []; } }
+function store(d){ localStorage.setItem(KEY, JSON.stringify(d)); }
+
+function calcNet(s,e,b){
+  if(!s||!e) return null;
+  var sp=s.split(":"), ep=e.split(":");
+  var st=parseInt(sp[0])*60+parseInt(sp[1]);
+  var en=parseInt(ep[0])*60+parseInt(ep[1]);
+  if(en<=st) en+=1440;
+  var n=en-st-(parseInt(b)||0);
+  return n>0?n:0;
+}
+function fmt(m){ if(m==null)return"--"; return Math.floor(m/60)+":"+("0"+m%60).slice(-2); }
+function fmtDate(d){ if(!d)return"--"; var p=d.split("-"); return p[2]+"."+p[1]+"."+p[0]; }
+function mk(d){ return d?d.slice(0,7):null; }
+function toast(msg){
+  var t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  clearTimeout(t._t); t._t=setTimeout(function(){ t.classList.remove("show"); },2500);
+}
+
+function updatePreview(){
+  var s=document.getElementById("inp-start").value;
+  var e=document.getElementById("inp-end").value;
+  var b=document.getElementById("inp-break").value;
+  var n=calcNet(s,e,b);
+  var el=document.getElementById("preview");
+  if(n!=null){ el.textContent="Nettozeit: "+fmt(n)+" Stunden"; el.className="preview ok"; }
+  else { el.textContent="Nettozeit wird berechnet..."; el.className="preview"; }
+}
+document.getElementById("inp-start").addEventListener("input", updatePreview);
+document.getElementById("inp-end").addEventListener("input", updatePreview);
+document.getElementById("inp-break").addEventListener("input", updatePreview);
+
+function buildMonths(){
+  var entries=load();
+  var months={};
+  entries.forEach(function(e){ if(mk(e.date)) months[mk(e.date)]=1; });
+  var now=new Date();
+  var cur=now.getFullYear()+"-"+("0"+(now.getMonth()+1)).slice(-2);
+  months[cur]=1;
+  var sorted=Object.keys(months).sort().reverse();
+  var sel=document.getElementById("month-select");
+  var prev=sel.value;
+  sel.innerHTML="";
+  sorted.forEach(function(key){
+    var p=key.split("-");
+    var d=new Date(parseInt(p[0]),parseInt(p[1])-1,1);
+    var label=d.toLocaleDateString("de-DE",{month:"long",year:"numeric"});
+    var o=document.createElement("option");
+    o.value=key; o.textContent=label; sel.appendChild(o);
+  });
+  if(prev && months[prev]) sel.value=prev;
+  else if(months[cur]) sel.value=cur;
+  else if(sorted.length) sel.value=sorted[0];
+}
+
+function saveEntry(){
+  var date=document.getElementById("inp-date").value;
+  var start=document.getElementById("inp-start").value;
+  var end=document.getElementById("inp-end").value;
+  var brk=parseInt(document.getElementById("inp-break").value)||0;
+  if(!date){ toast("Bitte Datum eingeben!"); return; }
+  if(!start){ toast("Bitte Beginn eingeben!"); return; }
+  if(!end){ toast("Bitte Ende eingeben!"); return; }
+  var net=calcNet(start,end,brk);
+  if(!net){ toast("Ungueltige Zeiteingabe!"); return; }
+  var entries=load();
+  entries.push({id:Date.now(),date:date,start:start,end:end,brk:brk,net:net});
+  entries.sort(function(a,b){ return a.date.localeCompare(b.date); });
+  store(entries);
+  buildMonths();
+  document.getElementById("month-select").value=mk(date);
+  renderEntries();
+  toast("Eintrag gespeichert!");
+  document.getElementById("inp-start").value="";
+  document.getElementById("inp-end").value="";
+  document.getElementById("inp-break").value="";
+  updatePreview();
+}
+
+function deleteEntry(id){
+  if(!confirm("Eintrag loeschen?")) return;
+  store(load().filter(function(e){ return e.id!==id; }));
+  buildMonths(); renderEntries(); toast("Eintrag geloescht.");
+}
+
+function renderEntries(){
+  var mkey=document.getElementById("month-select").value;
+  var entries=load().filter(function(e){ return mk(e.date)===mkey; });
+  var list=document.getElementById("entries-list");
+  if(!entries.length){
+    list.innerHTML="<div class=\"empty\">Keine Eintraege fuer diesen Monat.</div>";
+    document.getElementById("stat-total").textContent="0:00";
+    document.getElementById("stat-days").textContent="0";
+    document.getElementById("stat-avg").textContent="0:00";
+    return;
+  }
+  var total=0; entries.forEach(function(e){ total+=(e.net||0); });
+  var days=entries.length, avg=Math.round(total/days);
+  document.getElementById("stat-total").textContent=fmt(total)+" h";
+  document.getElementById("stat-days").textContent=days;
+  document.getElementById("stat-avg").textContent=fmt(avg)+" h";
+  var html="";
+  entries.forEach(function(e){
+    html+="<div class=\"entry-card\">";
+    html+="<div class=\"entry-date\">Datum: "+fmtDate(e.date)+"</div>";
+    html+="<div class=\"entry-fields\">";
+    html+="<div class=\"ef-item\"><span class=\"ef-lbl\">Beginn</span><span class=\"ef-val\">"+(e.start||"--")+"</span></div>";
+    html+="<div class=\"ef-item\"><span class=\"ef-lbl\">Ende</span><span class=\"ef-val\">"+(e.end||"--")+"</span></div>";
+    html+="<div class=\"ef-item\"><span class=\"ef-lbl\">Pause</span><span class=\"ef-val\">"+(e.brk||0)+"min</span></div>";
+    html+="<div class=\"ef-item\"><span class=\"ef-lbl\">Netto</span><span class=\"ef-val green\">"+fmt(e.net)+"h</span></div>";
+    html+="</div>";
+    html+="<button class=\"del-btn\" onclick=\"deleteEntry("+e.id+")\">&times;</button>";
+    html+="</div>";
+  });
+  list.innerHTML=html;
+}
+
+function exportCSV(){
+  var mkey=document.getElementById("month-select").value;
+  var entries=load().filter(function(e){ return mk(e.date)===mkey; });
+  if(!entries.length){ toast("Keine Daten."); return; }
+  var rows=[["Datum","Beginn","Ende","Pause (Min)","Nettozeit (h)"]];
+  entries.forEach(function(e){ rows.push([fmtDate(e.date),e.start,e.end,e.brk||0,fmt(e.net).replace(":",",")]); });
+  var csv=rows.map(function(r){ return r.join(";"); }).join("\r\n");
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"}));
+  a.download="arbeitszeit_"+mkey+".csv"; a.click();
+  toast("CSV exportiert!");
+}
+
+function drucken(){
+  var mkey=document.getElementById("month-select").value;
+  var entries=load().filter(function(e){ return mk(e.date)===mkey; });
+  if(!entries.length){ toast("Keine Daten."); return; }
+  var p=mkey.split("-");
+  var label=new Date(parseInt(p[0]),parseInt(p[1])-1,1).toLocaleDateString("de-DE",{month:"long",year:"numeric"});
+  var total=0; entries.forEach(function(e){ total+=(e.net||0); });
+  var days=entries.length, avg=Math.round(total/days);
+  var rows="";
+  entries.forEach(function(e){
+    rows+="<tr style=\"border-bottom:1px solid #f1f5f9;\">";
+    rows+="<td style=\"padding:0.6rem;\">"+fmtDate(e.date)+"</td>";
+    rows+="<td style=\"padding:0.6rem;\">"+(e.start||"--")+"</td>";
+    rows+="<td style=\"padding:0.6rem;\">"+(e.end||"--")+"</td>";
+    rows+="<td style=\"padding:0.6rem;\">"+(e.brk||0)+" min</td>";
+    rows+="<td style=\"padding:0.6rem;color:#059669;font-weight:700;\">"+fmt(e.net)+" h</td>";
+    rows+="</tr>";
+  });
+  var html="<div style=\"font-family:Arial,sans-serif;padding:2rem;\">";
+  html+="<div style=\"background:#0f172a;padding:1.25rem;\"><h1 style=\"color:#fff;margin:0;\">Arbeitszeiterfassung</h1>";
+  html+="<p style=\"color:#10b981;margin:0.3rem 0 0;\">"+label+" - Erstellt: "+new Date().toLocaleDateString("de-DE")+"</p></div>";
+  html+="<div style=\"display:flex;border:1px solid #e2e8f0;border-top:none;margin-bottom:1.5rem;\">";
+  html+="<div style=\"flex:1;text-align:center;padding:1rem;border-right:1px solid #e2e8f0;\"><div style=\"font-size:1.6rem;font-weight:800;color:#10b981;\">"+fmt(total)+" h</div><div style=\"font-size:0.7rem;color:#94a3b8;\">GESAMT</div></div>";
+  html+="<div style=\"flex:1;text-align:center;padding:1rem;border-right:1px solid #e2e8f0;\"><div style=\"font-size:1.6rem;font-weight:800;\">"+days+"</div><div style=\"font-size:0.7rem;color:#94a3b8;\">ARBEITSTAGE</div></div>";
+  html+="<div style=\"flex:1;text-align:center;padding:1rem;\"><div style=\"font-size:1.6rem;font-weight:800;\">"+fmt(avg)+" h</div><div style=\"font-size:0.7rem;color:#94a3b8;\">Oe PRO TAG</div></div></div>";
+  html+="<table style=\"width:100%;border-collapse:collapse;font-size:0.9rem;\">";
+  html+="<thead><tr style=\"background:#0f172a;color:#fff;\"><th style=\"padding:0.7rem;text-align:left;\">Datum</th><th style=\"padding:0.7rem;text-align:left;\">Beginn</th><th style=\"padding:0.7rem;text-align:left;\">Ende</th><th style=\"padding:0.7rem;text-align:left;\">Pause</th><th style=\"padding:0.7rem;text-align:left;\">Nettozeit</th></tr></thead>";
+  html+="<tbody>"+rows+"</tbody></table>";
+  html+="<div style=\"margin-top:1rem;font-size:0.75rem;color:#94a3b8;text-align:center;border-top:1px solid #e2e8f0;padding-top:0.75rem;\">Arbeitszeiterfassung - "+label+"</div></div>";
+  document.getElementById("print-area").innerHTML=html;
+  window.print();
+}
+
+document.getElementById("inp-date").value = new Date().toISOString().slice(0,10);
+buildMonths();
+renderEntries();
+</script>
+</body>
+</html>
